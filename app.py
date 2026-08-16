@@ -1,10 +1,10 @@
 import streamlit as st
 import pandas as pd
 
-# ============================================================
+# =========================================================
 # FINANCIAL DECISION ENGINE
 # Executive Financial Planning & Analysis
-# ============================================================
+# =========================================================
 
 st.set_page_config(
     page_title="Financial Decision Engine",
@@ -13,12 +13,12 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# ============================================================
+# =========================================================
 # BASELINE
-# ============================================================
+# =========================================================
 
 BASE_HEADCOUNT = 500
-AVG_MONTHLY_COST = 16936.05
+AVG_MONTHLY_COST = 16_936.05
 
 BASE_WORKFORCE_COST = (
     BASE_HEADCOUNT
@@ -29,450 +29,402 @@ BASE_WORKFORCE_COST = (
 BASE_REVENUE = 120_000_000
 BASE_BUDGET = 77_000_000
 
-# ============================================================
+
+# =========================================================
 # SESSION STATE
-# ============================================================
+# =========================================================
 
-if "reset_counter" not in st.session_state:
-    st.session_state.reset_counter = 0
-
-
-# ============================================================
-# FORMATTING
-# ============================================================
-
-def money_m(value):
-    return f"{value / 1_000_000:,.2f}M"
-
-def money_full(value):
-    return f"{value:,.0f} SAR"
-
-def pct(value):
-    return f"{value:.1f}%"
-
-def signed_money(value):
-    if value > 0:
-        return f"+{value:,.0f} SAR"
-    elif value < 0:
-        return f"{value:,.0f} SAR"
-    return "0 SAR"
+if "reset" not in st.session_state:
+    st.session_state.reset = 0
 
 
-# ============================================================
-# STYLE
-# ============================================================
+# =========================================================
+# CUSTOM CSS
+# =========================================================
 
 st.markdown(
     """
-<style>
+    <style>
 
-@import url(
-'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+Arabic:wght@400;500;600;700;800&display=swap'
-);
+    @import url(
+        'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800'
+        '&family=Noto+Sans+Arabic:wght@400;500;600;700;800&display=swap'
+    );
 
-html, body, [class*="css"] {
-    font-family:
+    html, body, [class*="css"] {
+        font-family:
         Inter,
         "Noto Sans Arabic",
-        Arial,
         sans-serif;
-}
-
-.stApp {
-    background: #f7f5f9;
-}
-
-/* Remove Streamlit top spacing */
-.block-container {
-    padding-top: 1.5rem;
-    padding-bottom: 3rem;
-    max-width: 1450px;
-}
-
-/* HERO */
-
-.hero {
-    background:
-        linear-gradient(
-            135deg,
-            #251039 0%,
-            #4B1F73 52%,
-            #76509A 100%
-        );
-
-    border-radius: 28px;
-
-    padding: 42px 44px 38px 44px;
-
-    color: white;
-
-    margin-bottom: 28px;
-
-    box-shadow:
-        0 18px 45px rgba(57, 25, 86, 0.20);
-}
-
-.hero-eyebrow {
-    font-size: 12px;
-    letter-spacing: 2px;
-    font-weight: 600;
-    opacity: 0.72;
-    margin-bottom: 14px;
-}
-
-.hero-title {
-    font-size: 42px;
-    line-height: 1.1;
-    font-weight: 800;
-    margin-bottom: 12px;
-}
-
-.hero-subtitle {
-    font-family:
-        "Noto Sans Arabic",
-        Arial,
-        sans-serif;
-
-    font-size: 18px;
-    font-weight: 500;
-    opacity: 0.92;
-}
-
-.hero-author {
-    margin-top: 25px;
-    font-size: 12px;
-    letter-spacing: 1px;
-    opacity: 0.65;
-}
-
-/* SECTION */
-
-.section-title {
-    font-size: 24px;
-    font-weight: 800;
-    color: #282531;
-    margin-top: 8px;
-}
-
-.section-subtitle {
-    color: #77717f;
-    font-size: 13px;
-    margin-bottom: 18px;
-}
-
-/* KPI */
-
-.kpi {
-    background: white;
-    border: 1px solid #e8e1ed;
-    border-radius: 20px;
-    padding: 22px;
-    min-height: 145px;
-
-    box-shadow:
-        0 8px 25px rgba(53, 27, 75, 0.06);
-}
-
-.kpi-label {
-    color: #817989;
-    font-size: 13px;
-    margin-bottom: 12px;
-}
-
-.kpi-value {
-    color: #292633;
-    font-size: 29px;
-    font-weight: 800;
-}
-
-.kpi-sub {
-    color: #9a94a1;
-    font-size: 11px;
-    margin-top: 8px;
-}
-
-/* PANELS */
-
-.panel {
-    background: white;
-    border: 1px solid #e8e1ed;
-    border-radius: 22px;
-
-    padding: 25px;
-
-    box-shadow:
-        0 8px 25px rgba(53, 27, 75, 0.06);
-}
-
-.panel-title {
-    color: #292633;
-    font-size: 20px;
-    font-weight: 800;
-}
-
-.panel-subtitle {
-    color: #817989;
-    font-size: 12px;
-    margin-top: 4px;
-    margin-bottom: 20px;
-}
-
-/* RESULT */
-
-.result {
-    background: #faf9fb;
-    border: 1px solid #ece6ef;
-    border-radius: 16px;
-    padding: 16px;
-    min-height: 100px;
-}
-
-.result-label {
-    color: #817989;
-    font-size: 11px;
-}
-
-.result-value {
-    color: #2d2935;
-    font-size: 21px;
-    font-weight: 800;
-    margin-top: 8px;
-}
-
-.positive {
-    color: #15845b !important;
-}
-
-.negative {
-    color: #b13b4b !important;
-}
-
-.purple {
-    color: #4B1F73 !important;
-}
-
-/* DECISION */
-
-.decision-box {
-    border-radius: 18px;
-    padding: 20px;
-    margin-top: 20px;
-
-    background:
-        linear-gradient(
-            135deg,
-            #f4eff7,
-            #faf8fb
-        );
-
-    border: 1px solid #e5dbea;
-}
-
-.decision-label {
-    color: #817989;
-    font-size: 11px;
-    letter-spacing: 1px;
-    margin-bottom: 8px;
-}
-
-.decision-title {
-    font-size: 24px;
-    font-weight: 800;
-}
-
-.decision-text {
-    color: #77717f;
-    font-size: 12px;
-    margin-top: 6px;
-    line-height: 1.7;
-}
-
-/* BUTTON */
-
-.stButton > button {
-    width: 100%;
-    border-radius: 12px;
-    border: none;
-
-    background: #4B1F73;
-    color: white;
-
-    font-weight: 700;
-    min-height: 44px;
-}
-
-.stButton > button:hover {
-    background: #351452;
-    color: white;
-}
-
-/* SLIDERS */
-
-.stSlider > div > div > div > div {
-    background: #4B1F73;
-}
-
-/* TABLE */
-
-.dataframe {
-    border-radius: 12px;
-}
-
-/* FOOTER */
-
-.footer {
-    text-align: center;
-    color: #96909d;
-    font-size: 11px;
-    padding: 25px 0 5px 0;
-}
-
-/* MOBILE */
-
-@media (max-width: 768px) {
-
-    .block-container {
-        padding-left: 1rem;
-        padding-right: 1rem;
     }
 
+    .stApp {
+        background: #f7f4f9;
+    }
+
+    /* HERO */
+
     .hero {
-        padding: 30px 24px;
-        border-radius: 22px;
+        background:
+        linear-gradient(
+            135deg,
+            #2e124a 0%,
+            #4B1F73 55%,
+            #74499a 100%
+        );
+
+        padding: 42px 38px;
+        border-radius: 0 0 28px 28px;
+        margin-bottom: 30px;
+        color: white;
+    }
+
+    .hero-eyebrow {
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 1.5px;
+        opacity: 0.75;
+        margin-bottom: 10px;
     }
 
     .hero-title {
-        font-size: 31px;
+        font-size: 36px;
+        font-weight: 800;
+        margin: 0;
     }
 
     .hero-subtitle {
-        font-size: 15px;
+        font-size: 17px;
+        margin-top: 10px;
+        opacity: 0.92;
+        direction: rtl;
     }
 
-    .kpi {
-        min-height: 125px;
+    .hero-author {
+        margin-top: 22px;
+        font-size: 12px;
+        letter-spacing: 1px;
+        opacity: 0.72;
     }
 
-}
 
-</style>
-""",
+    /* SECTION */
+
+    .section-title {
+        font-size: 27px;
+        font-weight: 800;
+        color: #28242d;
+        margin-top: 15px;
+    }
+
+    .section-subtitle {
+        color: #77717e;
+        font-size: 14px;
+        margin-bottom: 22px;
+        direction: rtl;
+    }
+
+
+    /* CARDS */
+
+    .card {
+        background: white;
+        border: 1px solid #e8e1ed;
+        border-radius: 20px;
+        padding: 22px;
+        box-shadow: 0 8px 24px rgba(48,18,77,0.06);
+        min-height: 145px;
+    }
+
+    .card-label {
+        color: #77717e;
+        font-size: 13px;
+        direction: rtl;
+    }
+
+    .card-value {
+        color: #28242d;
+        font-size: 29px;
+        font-weight: 800;
+        margin-top: 12px;
+    }
+
+    .card-sub {
+        color: #99929f;
+        font-size: 11px;
+        margin-top: 6px;
+    }
+
+
+    /* PANELS */
+
+    .panel {
+        background: white;
+        border: 1px solid #e8e1ed;
+        border-radius: 22px;
+        padding: 24px;
+        box-shadow: 0 8px 24px rgba(48,18,77,0.06);
+        margin-bottom: 20px;
+    }
+
+    .panel-title {
+        font-size: 21px;
+        font-weight: 800;
+        color: #29242f;
+        margin-bottom: 5px;
+    }
+
+    .panel-subtitle {
+        color: #77717e;
+        font-size: 12px;
+        margin-bottom: 18px;
+        direction: rtl;
+    }
+
+
+    /* RESULT */
+
+    .result {
+        background: #faf8fb;
+        border: 1px solid #e8e1ed;
+        border-radius: 16px;
+        padding: 17px;
+        min-height: 105px;
+        margin-bottom: 12px;
+    }
+
+    .result-label {
+        color: #77717e;
+        font-size: 12px;
+        direction: rtl;
+    }
+
+    .result-value {
+        color: #28242d;
+        font-size: 22px;
+        font-weight: 800;
+        margin-top: 8px;
+    }
+
+    .good {
+        color: #14845b !important;
+    }
+
+    .bad {
+        color: #b33d4a !important;
+    }
+
+    .neutral {
+        color: #4B1F73 !important;
+    }
+
+
+    /* DECISION */
+
+    .decision {
+        background: #f2edf6;
+        border-radius: 17px;
+        padding: 18px;
+        margin-top: 12px;
+        border-left: 5px solid #4B1F73;
+    }
+
+    .decision-title {
+        font-size: 18px;
+        font-weight: 800;
+    }
+
+    .decision-text {
+        color: #77717e;
+        font-size: 12px;
+        margin-top: 7px;
+        direction: rtl;
+    }
+
+
+    /* NET IMPACT */
+
+    .impact-box {
+        background: white;
+        border: 1px solid #e8e1ed;
+        border-radius: 22px;
+        padding: 28px;
+        margin: 25px 0;
+        box-shadow: 0 8px 24px rgba(48,18,77,0.06);
+    }
+
+    .impact-label {
+        color: #77717e;
+        font-size: 13px;
+        letter-spacing: 0.5px;
+    }
+
+    .impact-value {
+        font-size: 36px;
+        font-weight: 800;
+        margin-top: 10px;
+    }
+
+
+    /* BUTTON */
+
+    .stButton > button {
+        width: 100%;
+        border-radius: 12px;
+        border: 0;
+        background: #4B1F73;
+        color: white;
+        font-weight: 700;
+        padding: 11px 16px;
+    }
+
+    .stButton > button:hover {
+        background: #381656;
+        color: white;
+    }
+
+
+    /* SLIDER */
+
+    div[data-baseweb="slider"] {
+        margin-bottom: 18px;
+    }
+
+
+    /* FOOTER */
+
+    .footer {
+        text-align: center;
+        color: #99929f;
+        font-size: 11px;
+        padding: 30px 0;
+    }
+
+    </style>
+    """,
     unsafe_allow_html=True
 )
 
 
-# ============================================================
+# =========================================================
 # HERO
-# ============================================================
+# =========================================================
 
 st.markdown(
     """
-<div class="hero">
+    <div class="hero">
 
-    <div class="hero-eyebrow">
-        FINANCIAL DECISION INTELLIGENCE
+        <div class="hero-eyebrow">
+            FINANCIAL DECISION INTELLIGENCE
+        </div>
+
+        <div class="hero-title">
+            Financial Decision Engine
+        </div>
+
+        <div class="hero-subtitle">
+            من البيانات → الأثر المالي → القرار
+        </div>
+
+        <div class="hero-author">
+            FINANCIAL PLANNING & ANALYSIS
+        </div>
+
     </div>
-
-    <div class="hero-title">
-        Financial Decision Engine
-    </div>
-
-    <div class="hero-subtitle" dir="rtl">
-        من البيانات → الأثر المالي → القرار
-    </div>
-
-    <div class="hero-author">
-        FINANCIAL PLANNING & ANALYSIS
-    </div>
-
-</div>
-""",
+    """,
     unsafe_allow_html=True
 )
 
 
-# ============================================================
+# =========================================================
 # EXECUTIVE OVERVIEW
-# ============================================================
+# =========================================================
 
 st.markdown(
-    """
-<div class="section-title">
-    Executive Financial Overview
-</div>
+    '<div class="section-title">Executive Financial Overview</div>',
+    unsafe_allow_html=True
+)
 
-<div class="section-subtitle" dir="rtl">
-    نظرة تنفيذية سريعة على الوضع المالي الحالي قبل اتخاذ القرار.
-</div>
-""",
+st.markdown(
+    '<div class="section-subtitle">'
+    'نظرة تنفيذية سريعة على الوضع المالي الحالي قبل اتخاذ القرار.'
+    '</div>',
     unsafe_allow_html=True
 )
 
 
-k1, k2, k3, k4 = st.columns(4)
+# =========================================================
+# KPI CARDS
+# =========================================================
 
-with k1:
-    st.markdown(
-        f"""
-        <div class="kpi">
-            <div class="kpi-label">عدد الموظفين</div>
-            <div class="kpi-value">{BASE_HEADCOUNT:,}</div>
-            <div class="kpi-sub">Current Headcount</div>
-        </div>
-        """,
-        unsafe_allow_html=True
+kpi_cols = st.columns(4)
+
+kpis = [
+    (
+        "عدد الموظفين",
+        f"{BASE_HEADCOUNT:,}",
+        "Current Headcount"
+    ),
+    (
+        "تكلفة القوى العاملة السنوية",
+        f"{BASE_WORKFORCE_COST / 1_000_000:.2f}M",
+        "Annual Workforce Cost"
+    ),
+    (
+        "الإيرادات السنوية",
+        f"{BASE_REVENUE / 1_000_000:.2f}M",
+        "Annual Revenue"
+    ),
+    (
+        "الميزانية السنوية",
+        f"{BASE_BUDGET / 1_000_000:.2f}M",
+        "Annual Budget"
     )
+]
 
-with k2:
-    st.markdown(
-        f"""
-        <div class="kpi">
-            <div class="kpi-label">تكلفة القوى العاملة السنوية</div>
-            <div class="kpi-value">{money_m(BASE_WORKFORCE_COST)}</div>
-            <div class="kpi-sub">Annual Workforce Cost</div>
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
+for col, item in zip(kpi_cols, kpis):
 
-with k3:
-    st.markdown(
-        f"""
-        <div class="kpi">
-            <div class="kpi-label">الميزانية السنوية</div>
-            <div class="kpi-value">{money_m(BASE_BUDGET)}</div>
-            <div class="kpi-sub">Annual Budget</div>
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
+    label, value, subtitle = item
 
-with k4:
-    st.markdown(
-        f"""
-        <div class="kpi">
-            <div class="kpi-label">متوسط تكلفة الموظف شهريًا</div>
-            <div class="kpi-value">{AVG_MONTHLY_COST:,.0f}</div>
-            <div class="kpi-sub">SAR / Employee / Month</div>
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
+    with col:
 
+        st.markdown(
+            f"""
+            <div class="card">
+
+                <div class="card-label">
+                    {label}
+                </div>
+
+                <div class="card-value">
+                    {value}
+                </div>
+
+                <div class="card-sub">
+                    {subtitle}
+                </div>
+
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
+
+# =========================================================
+# SCENARIO ENGINE
+# =========================================================
 
 st.markdown("<br>", unsafe_allow_html=True)
 
-
-# ============================================================
-# DECISION ENGINE
-# ============================================================
-
-left, right = st.columns([0.85, 1.55], gap="large")
+left, right = st.columns(
+    [0.85, 1.55],
+    gap="large"
+)
 
 
-# ============================================================
-# LEFT — DRIVERS
-# ============================================================
+# =========================================================
+# LEFT — DECISION DRIVERS
+# =========================================================
 
 with left:
 
@@ -484,8 +436,8 @@ with left:
                 Decision Drivers
             </div>
 
-            <div class="panel-subtitle" dir="rtl">
-                غيّري الافتراضات وشاهدي الأثر المالي للقرار فورًا.
+            <div class="panel-subtitle">
+                غيّري الافتراضات وشاهدي الأثر المالي فورًا.
             </div>
 
         </div>
@@ -506,7 +458,8 @@ with left:
         min_value=0,
         max_value=20,
         value=0,
-        step=1
+        step=1,
+        format="%d%%"
     )
 
     revenue_growth = st.slider(
@@ -514,7 +467,8 @@ with left:
         min_value=-10,
         max_value=30,
         value=0,
-        step=1
+        step=1,
+        format="%d%%"
     )
 
     efficiency = st.slider(
@@ -522,32 +476,33 @@ with left:
         min_value=0,
         max_value=20,
         value=0,
-        step=1
+        step=1,
+        format="%d%%"
     )
 
     st.markdown("<br>", unsafe_allow_html=True)
 
-    reset = st.button("إعادة ضبط السيناريو")
+    if st.button("إعادة ضبط السيناريو"):
 
-    if reset:
         st.rerun()
 
     st.markdown(
         """
         <div style="
-            background:#f5f0f7;
+            background:#f4eff7;
             border-radius:14px;
             padding:14px;
-            margin-top:15px;
-            color:#6f6877;
             font-size:11px;
+            color:#645b69;
             line-height:1.8;
-        " dir="rtl">
+            margin-top:15px;
+            direction:rtl;
+        ">
 
-        <b>منهجية المحرك</b><br>
-        يتم تحويل كل افتراض إلى أثر مالي،
-        ثم مقارنة الأثر بالوضع الحالي للوصول
-        إلى إشارة قرار أولية.
+        هذه نسخة MVP من محرك القرار المالي.
+        <br><br>
+        لاحقًا يمكن ربط المحرك ببيانات المؤسسة الفعلية
+        وإضافة السيناريوهات والتقارير ومصادر البيانات.
 
         </div>
         """,
@@ -555,22 +510,18 @@ with left:
     )
 
 
-# ============================================================
-# CALCULATIONS
-# ============================================================
+# =========================================================
+# FINANCIAL ENGINE
+# =========================================================
 
-headcount = BASE_HEADCOUNT + new_employees
+hc = BASE_HEADCOUNT + new_employees
 
-salary_factor = 1 + (salary_increase / 100)
-
-efficiency_factor = 1 - (efficiency / 100)
-
-annual_workforce_cost = (
-    headcount
-    * AVG_MONTHLY_COST
+payroll = (
+    AVG_MONTHLY_COST
+    * hc
     * 12
-    * salary_factor
-    * efficiency_factor
+    * (1 + salary_increase / 100)
+    * (1 - efficiency / 100)
 )
 
 revenue = (
@@ -579,73 +530,54 @@ revenue = (
 )
 
 incremental_cost = (
-    annual_workforce_cost
-    - BASE_WORKFORCE_COST
+    payroll - BASE_WORKFORCE_COST
 )
 
-revenue_impact = (
-    revenue
-    - BASE_REVENUE
+revenue_delta = (
+    revenue - BASE_REVENUE
 )
 
 net_impact = (
-    revenue_impact
-    - incremental_cost
+    revenue_delta - incremental_cost
 )
 
-budget_usage = (
-    annual_workforce_cost
-    / BASE_BUDGET
-    * 100
-)
-
-budget_gap = (
-    BASE_BUDGET
-    - annual_workforce_cost
-)
+budget_ratio = (
+    payroll / BASE_BUDGET
+) * 100
 
 
-# ============================================================
+# =========================================================
 # DECISION LOGIC
-# ============================================================
+# =========================================================
 
 if net_impact > 1_000_000:
 
     decision = "قرار إيجابي مبدئي"
-    decision_class = "positive"
-
     explanation = (
-        "الأثر المالي المتوقع موجب، "
-        "ما يشير إلى أن السيناريو قد يخلق قيمة مالية "
-        "وفق الافتراضات الحالية."
+        "الأثر المالي المتوقع موجب وفق الافتراضات الحالية."
     )
+    decision_class = "good"
 
 elif net_impact < -1_000_000:
 
     decision = "يحتاج مراجعة"
-    decision_class = "negative"
-
     explanation = (
-        "الأثر المالي المتوقع سالب، "
-        "لذلك تحتاج الإدارة إلى مراجعة التكلفة "
-        "أو الافتراضات قبل اعتماد القرار."
+        "الزيادة في التكلفة تتجاوز الأثر المالي المتوقع."
     )
+    decision_class = "bad"
 
 else:
 
     decision = "محايد"
-
-    decision_class = "purple"
-
     explanation = (
-        "الأثر المالي قريب من نقطة التعادل، "
-        "ويحتاج القرار إلى تحليل إضافي قبل الاعتماد."
+        "السيناريو قريب من الوضع الحالي ويحتاج تقييمًا إضافيًا."
     )
+    decision_class = "neutral"
 
 
-# ============================================================
-# RIGHT — IMPACT
-# ============================================================
+# =========================================================
+# RIGHT — FINANCIAL IMPACT
+# =========================================================
 
 with right:
 
@@ -654,147 +586,88 @@ with right:
         <div class="panel">
 
             <div class="panel-title">
-                Financial Impact
+                Financial Impact of Decision
             </div>
 
-            <div class="panel-subtitle" dir="rtl">
-                كيف يتغير الوضع المالي إذا تم تنفيذ السيناريو؟
+            <div class="panel-subtitle">
+                الأثر المالي المتوقع بناءً على السيناريو المختار.
             </div>
 
+        </div>
         """,
         unsafe_allow_html=True
     )
 
-    r1, r2, r3 = st.columns(3)
+    result_cols = st.columns(3)
 
-    with r1:
-        st.markdown(
-            f"""
-            <div class="result">
-                <div class="result-label">
-                    الموظفون بعد القرار
-                </div>
-
-                <div class="result-value purple">
-                    {headcount:,}
-                </div>
-            </div>
-            """,
-            unsafe_allow_html=True
+    results = [
+        (
+            "الموظفون بعد القرار",
+            f"{hc:,}",
+            ""
+        ),
+        (
+            "التكلفة السنوية الجديدة",
+            f"{payroll / 1_000_000:.2f}M",
+            ""
+        ),
+        (
+            "الزيادة في التكلفة",
+            f"{incremental_cost:,.0f} SAR",
+            ""
+        ),
+        (
+            "الإيرادات المتوقعة",
+            f"{revenue / 1_000_000:.2f}M",
+            ""
+        ),
+        (
+            "الأثر المالي الصافي",
+            f"{net_impact:+,.0f} SAR",
+            decision_class
+        ),
+        (
+            "التكلفة مقابل الميزانية",
+            f"{budget_ratio:.1f}%",
+            ""
         )
+    ]
 
-    with r2:
-        st.markdown(
-            f"""
-            <div class="result">
-                <div class="result-label">
-                    التكلفة السنوية الجديدة
+    for i, item in enumerate(results):
+
+        label, value, css_class = item
+
+        with result_cols[i % 3]:
+
+            st.markdown(
+                f"""
+                <div class="result">
+
+                    <div class="result-label">
+                        {label}
+                    </div>
+
+                    <div class="result-value {css_class}">
+                        {value}
+                    </div>
+
                 </div>
-
-                <div class="result-value">
-                    {money_m(annual_workforce_cost)}
-                </div>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-
-    with r3:
-        cost_class = "negative" if incremental_cost > 0 else "positive"
-
-        st.markdown(
-            f"""
-            <div class="result">
-                <div class="result-label">
-                    التغير في التكلفة
-                </div>
-
-                <div class="result-value {cost_class}">
-                    {signed_money(incremental_cost)}
-                </div>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-
-    st.markdown("<br>", unsafe_allow_html=True)
-
-    r4, r5, r6 = st.columns(3)
-
-    with r4:
-        st.markdown(
-            f"""
-            <div class="result">
-                <div class="result-label">
-                    الإيرادات المتوقعة
-                </div>
-
-                <div class="result-value">
-                    {money_m(revenue)}
-                </div>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-
-    with r5:
-
-        revenue_class = (
-            "positive"
-            if revenue_impact > 0
-            else "negative"
-        )
-
-        st.markdown(
-            f"""
-            <div class="result">
-                <div class="result-label">
-                    أثر الإيرادات
-                </div>
-
-                <div class="result-value {revenue_class}">
-                    {signed_money(revenue_impact)}
-                </div>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-
-    with r6:
-
-        st.markdown(
-            f"""
-            <div class="result">
-                <div class="result-label">
-                    استخدام الميزانية
-                </div>
-
-                <div class="result-value purple">
-                    {budget_usage:.1f}%
-                </div>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
+                """,
+                unsafe_allow_html=True
+            )
 
 
-    # ========================================================
-    # DECISION
-    # ========================================================
+    # Decision
 
     st.markdown(
         f"""
-        <div class="decision-box">
-
-            <div class="decision-label">
-                DECISION SIGNAL
-            </div>
+        <div class="decision">
 
             <div class="decision-title {decision_class}">
                 {decision}
             </div>
 
-            <div class="decision-text" dir="rtl">
+            <div class="decision-text">
                 {explanation}
             </div>
 
@@ -804,74 +677,200 @@ with right:
     )
 
 
-    # ========================================================
-    # BUDGET
-    # ========================================================
-
-    st.markdown("<br>", unsafe_allow_html=True)
-
-    st.markdown(
-        "**Budget Utilization**"
-    )
-
-    st.progress(
-        min(max(budget_usage / 100, 0), 1)
-    )
-
-    if budget_gap >= 0:
-
-        st.caption(
-            f"{money_m(annual_workforce_cost)} "
-            f"مقابل ميزانية {money_m(BASE_BUDGET)} "
-            f"— المتبقي {money_m(budget_gap)}"
-        )
-
-    else:
-
-        st.caption(
-            f"{money_m(annual_workforce_cost)} "
-            f"مقابل ميزانية {money_m(BASE_BUDGET)} "
-            f"— تجاوز {money_m(abs(budget_gap))}"
-        )
-
-
-    st.markdown("</div>", unsafe_allow_html=True)
-
-
-# ============================================================
-# FINANCIAL BRIDGE
-# ============================================================
-
-st.markdown("<br>", unsafe_allow_html=True)
+# =========================================================
+# NET IMPACT HIGHLIGHT
+# =========================================================
 
 st.markdown(
-    """
-    <div class="section-title">
-        Financial Decision Bridge
-    </div>
+    f"""
+    <div class="impact-box">
 
-    <div class="section-subtitle" dir="rtl">
-        من أين جاء الأثر المالي للقرار؟
+        <div class="impact-label">
+            NET FINANCIAL IMPACT
+        </div>
+
+        <div class="impact-value {decision_class}">
+            {net_impact:+,.0f} SAR
+        </div>
+
     </div>
     """,
     unsafe_allow_html=True
 )
 
 
-bridge_left, bridge_right = st.columns([1.25, 0.75], gap="large")
+# =========================================================
+# BUDGET UTILIZATION
+# =========================================================
+
+budget_col1, budget_col2 = st.columns(
+    [1.4, 1]
+)
+
+with budget_col1:
+
+    st.markdown(
+        """
+        <div class="panel">
+
+            <div class="panel-title">
+                Budget Utilization
+            </div>
+
+            <div class="panel-subtitle">
+                نسبة تكلفة القوى العاملة من الميزانية السنوية.
+            </div>
+
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+    st.progress(
+        min(
+            max(
+                budget_ratio / 100,
+                0
+            ),
+            1
+        )
+    )
+
+    st.caption(
+        f"{payroll / 1_000_000:.2f}M SAR "
+        f"مقابل ميزانية "
+        f"{BASE_BUDGET / 1_000_000:.2f}M SAR "
+        f"— {budget_ratio:.1f}%"
+    )
 
 
-with bridge_left:
+with budget_col2:
+
+    st.markdown(
+        f"""
+        <div class="panel">
+
+            <div class="panel-title">
+                Cost per Employee
+            </div>
+
+            <div class="panel-subtitle">
+                متوسط التكلفة الشهرية للموظف.
+            </div>
+
+            <div class="result-value">
+                {AVG_MONTHLY_COST:,.0f} SAR
+            </div>
+
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+
+# =========================================================
+# COMPARISON
+# =========================================================
+
+st.markdown("<br>", unsafe_allow_html=True)
+
+st.markdown(
+    """
+    <div class="panel">
+
+        <div class="panel-title">
+            Current vs Scenario
+        </div>
+
+        <div class="panel-subtitle">
+            مقارنة الوضع الحالي بالسيناريو المقترح.
+        </div>
+
+    </div>
+    """,
+    unsafe_allow_html=True
+)
+
+comparison = pd.DataFrame(
+    {
+        "Indicator": [
+            "Headcount",
+            "Annual Workforce Cost",
+            "Revenue",
+            "Net Financial Impact"
+        ],
+
+        "Current": [
+            f"{BASE_HEADCOUNT:,}",
+            f"{BASE_WORKFORCE_COST / 1_000_000:.2f}M",
+            f"{BASE_REVENUE / 1_000_000:.2f}M",
+            "0 SAR"
+        ],
+
+        "Scenario": [
+            f"{hc:,}",
+            f"{payroll / 1_000_000:.2f}M",
+            f"{revenue / 1_000_000:.2f}M",
+            f"{net_impact:+,.0f} SAR"
+        ],
+
+        "Change": [
+            f"{new_employees:+,}",
+            f"{incremental_cost:+,.0f} SAR",
+            f"{revenue_delta:+,.0f} SAR",
+            f"{net_impact:+,.0f} SAR"
+        ]
+    }
+)
+
+st.dataframe(
+    comparison,
+    use_container_width=True,
+    hide_index=True
+)
+
+
+# =========================================================
+# FINANCIAL IMPACT BRIDGE
+# =========================================================
+
+st.markdown("<br>", unsafe_allow_html=True)
+
+bridge_col, scenario_col = st.columns(
+    2,
+    gap="large"
+)
+
+
+with bridge_col:
+
+    st.markdown(
+        """
+        <div class="panel">
+
+            <div class="panel-title">
+                Financial Impact Bridge
+            </div>
+
+            <div class="panel-subtitle">
+                مكونات التغير في الأثر المالي.
+            </div>
+
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
 
     bridge = pd.DataFrame(
         {
-            "الأثر": [
+            "Component": [
                 "Revenue Impact",
                 "Incremental Cost",
                 "Net Impact"
             ],
+
             "SAR": [
-                revenue_impact,
+                revenue_delta,
                 -incremental_cost,
                 net_impact
             ]
@@ -879,103 +878,15 @@ with bridge_left:
     )
 
     st.bar_chart(
-        bridge.set_index("الأثر"),
-        use_container_width=True
+        bridge.set_index("Component")
     )
 
 
-with bridge_right:
-
-    st.markdown(
-        """
-        <div class="panel">
-
-            <div class="panel-title">
-                Decision Summary
-            </div>
-
-            <div class="panel-subtitle" dir="rtl">
-                الخلاصة المالية للسيناريو الحالي.
-            </div>
-
-        """,
-        unsafe_allow_html=True
-    )
-
-    summary = pd.DataFrame(
-        {
-            "Metric": [
-                "Headcount",
-                "Workforce Cost",
-                "Revenue",
-                "Net Impact"
-            ],
-
-            "Current": [
-                f"{BASE_HEADCOUNT:,}",
-                money_m(BASE_WORKFORCE_COST),
-                money_m(BASE_REVENUE),
-                "0 SAR"
-            ],
-
-            "Scenario": [
-                f"{headcount:,}",
-                money_m(annual_workforce_cost),
-                money_m(revenue),
-                signed_money(net_impact)
-            ]
-        }
-    )
-
-    st.dataframe(
-        summary,
-        use_container_width=True,
-        hide_index=True
-    )
-
-    st.markdown(
-        f"""
-        <div style="
-            margin-top:15px;
-            padding:14px;
-            border-radius:14px;
-            background:#f7f3f9;
-        ">
-
-        <div style="
-            color:#817989;
-            font-size:11px;
-        ">
-        NET FINANCIAL IMPACT
-        </div>
-
-        <div class="{decision_class}"
-             style="
-                font-size:24px;
-                font-weight:800;
-                margin-top:5px;
-             ">
-            {signed_money(net_impact)}
-        </div>
-
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
-
-    st.markdown("</div>", unsafe_allow_html=True)
-
-
-# ============================================================
+# =========================================================
 # SCENARIO SNAPSHOT
-# ============================================================
+# =========================================================
 
-st.markdown("<br>", unsafe_allow_html=True)
-
-s1, s2 = st.columns(2, gap="large")
-
-
-with s1:
+with scenario_col:
 
     st.markdown(
         """
@@ -985,15 +896,16 @@ with s1:
                 Scenario Assumptions
             </div>
 
-            <div class="panel-subtitle" dir="rtl">
+            <div class="panel-subtitle">
                 الافتراضات التي بُني عليها القرار.
             </div>
 
+        </div>
         """,
         unsafe_allow_html=True
     )
 
-    assumptions = pd.DataFrame(
+    snapshot = pd.DataFrame(
         {
             "Driver": [
                 "New Employees",
@@ -1003,7 +915,7 @@ with s1:
             ],
 
             "Selected": [
-                f"{new_employees:+,}",
+                f"{new_employees:+}",
                 f"{salary_increase}%",
                 f"{revenue_growth}%",
                 f"{efficiency}%"
@@ -1012,87 +924,74 @@ with s1:
     )
 
     st.dataframe(
-        assumptions,
+        snapshot,
         use_container_width=True,
         hide_index=True
     )
 
-    st.markdown("</div>", unsafe_allow_html=True)
 
+# =========================================================
+# MANAGEMENT INSIGHT
+# =========================================================
 
-with s2:
+st.markdown("<br>", unsafe_allow_html=True)
 
-    st.markdown(
-        """
-        <div class="panel">
+if net_impact > 0:
 
-            <div class="panel-title">
-                Management Insight
-            </div>
-
-            <div class="panel-subtitle" dir="rtl">
-                ماذا تعني الأرقام لصانع القرار؟
-            </div>
-
-        """,
-        unsafe_allow_html=True
+    insight = (
+        "السيناريو المقترح يحقق أثرًا ماليًا موجبًا. "
+        "يوصى بمراجعة مصدر الإيرادات المتوقع والتأكد من "
+        "استدامة التحسن قبل اعتماد القرار."
     )
 
-    if net_impact > 1_000_000:
+else:
 
-        insight = (
-            "السيناريو يحقق أثرًا ماليًا موجبًا. "
-            "قبل الاعتماد النهائي، يجب اختبار استدامة نمو الإيرادات "
-            "ومدى قدرة الكفاءة التشغيلية على دعم النتيجة."
-        )
+    insight = (
+        "السيناريو المقترح يحقق أثرًا ماليًا سلبيًا. "
+        "يوصى بإعادة تقييم التكلفة أو البحث عن بدائل "
+        "تحقق الأثر التشغيلي بتكلفة أقل."
+    )
 
-    elif net_impact < -1_000_000:
 
-        insight = (
-            "السيناريو يخلق ضغطًا ماليًا. "
-            "يمكن تحسين النتيجة عبر خفض الزيادة في التكلفة، "
-            "رفع الكفاءة، أو إعادة تقييم مستهدفات الإيرادات."
-        )
+st.markdown(
+    f"""
+    <div class="panel">
 
-    else:
-
-        insight = (
-            "السيناريو قريب من نقطة التعادل. "
-            "يفضل اختبار سيناريوهات بديلة قبل اتخاذ القرار النهائي."
-        )
-
-    st.markdown(
-        f"""
-        <div style="
-            background:#f7f3f9;
-            border-left:4px solid #4B1F73;
-            padding:18px;
-            border-radius:12px;
-            color:#5f5966;
-            font-size:13px;
-            line-height:1.9;
-        " dir="rtl">
-
-        {insight}
-
+        <div class="panel-title">
+            Management Insight
         </div>
-        """,
-        unsafe_allow_html=True
-    )
 
-    st.markdown("</div>", unsafe_allow_html=True)
+        <div class="panel-subtitle">
+            قراءة تحليلية للقرار.
+        </div>
+
+        <div style="
+            background:#f4eff7;
+            padding:18px;
+            border-radius:15px;
+            line-height:1.9;
+            color:#51495a;
+            direction:rtl;
+        ">
+            {insight}
+        </div>
+
+    </div>
+    """,
+    unsafe_allow_html=True
+)
 
 
-# ============================================================
+# =========================================================
 # FOOTER
-# ============================================================
+# =========================================================
 
 st.markdown(
     """
     <div class="footer">
-        Financial Decision Engine · Financial Planning & Analysis · MVP
+        Financial Decision Engine — MVP
         <br>
-        From Data → Financial Impact → Decision
+        Financial Planning & Analysis
     </div>
     """,
     unsafe_allow_html=True
