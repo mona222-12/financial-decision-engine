@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+import textwrap
 
 # =========================================================
 # FINANCIAL DECISION ENGINE
@@ -31,6 +32,17 @@ BASE_BUDGET = 77_000_000
 
 
 # =========================================================
+# HELPER
+# =========================================================
+
+def render_html(html):
+    st.markdown(
+        textwrap.dedent(html),
+        unsafe_allow_html=True
+    )
+
+
+# =========================================================
 # SESSION STATE
 # =========================================================
 
@@ -42,315 +54,314 @@ if "reset" not in st.session_state:
 # CUSTOM CSS
 # =========================================================
 
-st.markdown(
-    """
-    <style>
+render_html("""
+<style>
 
-    @import url(
-        'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800'
-        '&family=Noto+Sans+Arabic:wght@400;500;600;700;800&display=swap'
+@import url(
+    'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800'
+    '&family=Noto+Sans+Arabic:wght@400;500;600;700;800&display=swap'
+);
+
+html, body, [class*="css"] {
+    font-family:
+    Inter,
+    "Noto Sans Arabic",
+    sans-serif;
+}
+
+.stApp {
+    background: #f7f4f9;
+}
+
+/* HERO */
+
+.hero {
+    background:
+    linear-gradient(
+        135deg,
+        #2e124a 0%,
+        #4B1F73 55%,
+        #74499a 100%
     );
 
-    html, body, [class*="css"] {
-        font-family:
-        Inter,
-        "Noto Sans Arabic",
-        sans-serif;
-    }
+    padding: 42px 38px;
+    border-radius: 0 0 28px 28px;
+    margin-bottom: 30px;
+    color: white;
+}
 
-    .stApp {
-        background: #f7f4f9;
-    }
+.hero-eyebrow {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    opacity: 0.75;
+    margin-bottom: 10px;
+}
 
-    /* HERO */
+.hero-title {
+    font-size: 36px;
+    font-weight: 800;
+    margin: 0;
+}
 
-    .hero {
-        background:
-        linear-gradient(
-            135deg,
-            #2e124a 0%,
-            #4B1F73 55%,
-            #74499a 100%
-        );
+.hero-subtitle {
+    font-size: 17px;
+    margin-top: 10px;
+    opacity: 0.92;
+    direction: rtl;
+}
 
-        padding: 42px 38px;
-        border-radius: 0 0 28px 28px;
-        margin-bottom: 30px;
-        color: white;
-    }
-
-    .hero-eyebrow {
-        font-size: 12px;
-        font-weight: 600;
-        letter-spacing: 1.5px;
-        opacity: 0.75;
-        margin-bottom: 10px;
-    }
-
-    .hero-title {
-        font-size: 36px;
-        font-weight: 800;
-        margin: 0;
-    }
-
-    .hero-subtitle {
-        font-size: 17px;
-        margin-top: 10px;
-        opacity: 0.92;
-        direction: rtl;
-    }
-
-    .hero-author {
-        margin-top: 22px;
-        font-size: 12px;
-        letter-spacing: 1px;
-        opacity: 0.72;
-    }
+.hero-author {
+    margin-top: 22px;
+    font-size: 12px;
+    letter-spacing: 1px;
+    opacity: 0.72;
+}
 
 
-    /* SECTION */
+/* SECTION */
 
-    .section-title {
-        font-size: 27px;
-        font-weight: 800;
-        color: #28242d;
-        margin-top: 15px;
-    }
+.section-title {
+    font-size: 27px;
+    font-weight: 800;
+    color: #28242d;
+    margin-top: 15px;
+}
 
-    .section-subtitle {
-        color: #77717e;
-        font-size: 14px;
-        margin-bottom: 22px;
-        direction: rtl;
-    }
-
-
-    /* CARDS */
-
-    .card {
-        background: white;
-        border: 1px solid #e8e1ed;
-        border-radius: 20px;
-        padding: 22px;
-        box-shadow: 0 8px 24px rgba(48,18,77,0.06);
-        min-height: 145px;
-    }
-
-    .card-label {
-        color: #77717e;
-        font-size: 13px;
-        direction: rtl;
-    }
-
-    .card-value {
-        color: #28242d;
-        font-size: 29px;
-        font-weight: 800;
-        margin-top: 12px;
-    }
-
-    .card-sub {
-        color: #99929f;
-        font-size: 11px;
-        margin-top: 6px;
-    }
+.section-subtitle {
+    color: #77717e;
+    font-size: 14px;
+    margin-bottom: 22px;
+    direction: rtl;
+}
 
 
-    /* PANELS */
+/* CARDS */
 
-    .panel {
-        background: white;
-        border: 1px solid #e8e1ed;
-        border-radius: 22px;
-        padding: 24px;
-        box-shadow: 0 8px 24px rgba(48,18,77,0.06);
-        margin-bottom: 20px;
-    }
+.card {
+    background: white;
+    border: 1px solid #e8e1ed;
+    border-radius: 20px;
+    padding: 22px;
+    box-shadow: 0 8px 24px rgba(48,18,77,0.06);
+    min-height: 145px;
+}
 
-    .panel-title {
-        font-size: 21px;
-        font-weight: 800;
-        color: #29242f;
-        margin-bottom: 5px;
-    }
+.card-label {
+    color: #77717e;
+    font-size: 13px;
+    direction: rtl;
+}
 
-    .panel-subtitle {
-        color: #77717e;
-        font-size: 12px;
-        margin-bottom: 18px;
-        direction: rtl;
-    }
+.card-value {
+    color: #28242d;
+    font-size: 29px;
+    font-weight: 800;
+    margin-top: 12px;
+}
 
-
-    /* RESULT */
-
-    .result {
-        background: #faf8fb;
-        border: 1px solid #e8e1ed;
-        border-radius: 16px;
-        padding: 17px;
-        min-height: 105px;
-        margin-bottom: 12px;
-    }
-
-    .result-label {
-        color: #77717e;
-        font-size: 12px;
-        direction: rtl;
-    }
-
-    .result-value {
-        color: #28242d;
-        font-size: 22px;
-        font-weight: 800;
-        margin-top: 8px;
-    }
-
-    .good {
-        color: #14845b !important;
-    }
-
-    .bad {
-        color: #b33d4a !important;
-    }
-
-    .neutral {
-        color: #4B1F73 !important;
-    }
+.card-sub {
+    color: #99929f;
+    font-size: 11px;
+    margin-top: 6px;
+}
 
 
-    /* DECISION */
+/* PANELS */
 
-    .decision {
-        background: #f2edf6;
-        border-radius: 17px;
-        padding: 18px;
-        margin-top: 12px;
-        border-left: 5px solid #4B1F73;
-    }
+.panel {
+    background: white;
+    border: 1px solid #e8e1ed;
+    border-radius: 22px;
+    padding: 24px;
+    box-shadow: 0 8px 24px rgba(48,18,77,0.06);
+    margin-bottom: 20px;
+}
 
-    .decision-title {
-        font-size: 18px;
-        font-weight: 800;
-    }
+.panel-title {
+    font-size: 21px;
+    font-weight: 800;
+    color: #29242f;
+    margin-bottom: 5px;
+}
 
-    .decision-text {
-        color: #77717e;
-        font-size: 12px;
-        margin-top: 7px;
-        direction: rtl;
-    }
-
-
-    /* NET IMPACT */
-
-    .impact-box {
-        background: white;
-        border: 1px solid #e8e1ed;
-        border-radius: 22px;
-        padding: 28px;
-        margin: 25px 0;
-        box-shadow: 0 8px 24px rgba(48,18,77,0.06);
-    }
-
-    .impact-label {
-        color: #77717e;
-        font-size: 13px;
-        letter-spacing: 0.5px;
-    }
-
-    .impact-value {
-        font-size: 36px;
-        font-weight: 800;
-        margin-top: 10px;
-    }
+.panel-subtitle {
+    color: #77717e;
+    font-size: 12px;
+    margin-bottom: 18px;
+    direction: rtl;
+}
 
 
-    /* BUTTON */
+/* RESULT */
 
-    .stButton > button {
-        width: 100%;
-        border-radius: 12px;
-        border: 0;
-        background: #4B1F73;
-        color: white;
-        font-weight: 700;
-        padding: 11px 16px;
-    }
+.result {
+    background: #faf8fb;
+    border: 1px solid #e8e1ed;
+    border-radius: 16px;
+    padding: 17px;
+    min-height: 105px;
+    margin-bottom: 12px;
+}
 
-    .stButton > button:hover {
-        background: #381656;
-        color: white;
-    }
+.result-label {
+    color: #77717e;
+    font-size: 12px;
+    direction: rtl;
+}
+
+.result-value {
+    color: #28242d;
+    font-size: 22px;
+    font-weight: 800;
+    margin-top: 8px;
+}
+
+.good {
+    color: #14845b !important;
+}
+
+.bad {
+    color: #b33d4a !important;
+}
+
+.neutral {
+    color: #4B1F73 !important;
+}
 
 
-    /* SLIDER */
+/* DECISION */
 
-    div[data-baseweb="slider"] {
-        margin-bottom: 18px;
-    }
+.decision {
+    background: #f2edf6;
+    border-radius: 17px;
+    padding: 18px;
+    margin-top: 12px;
+    border-left: 5px solid #4B1F73;
+}
+
+.decision-title {
+    font-size: 18px;
+    font-weight: 800;
+}
+
+.decision-text {
+    color: #77717e;
+    font-size: 12px;
+    margin-top: 7px;
+    direction: rtl;
+}
 
 
-    /* FOOTER */
+/* NET IMPACT */
 
-    .footer {
-        text-align: center;
-        color: #99929f;
-        font-size: 11px;
-        padding: 30px 0;
-    }
+.impact-box {
+    background: white;
+    border: 1px solid #e8e1ed;
+    border-radius: 22px;
+    padding: 28px;
+    margin: 25px 0;
+    box-shadow: 0 8px 24px rgba(48,18,77,0.06);
+}
 
-    </style>
-    """,
-    unsafe_allow_html=True
-)
+.impact-label {
+    color: #77717e;
+    font-size: 13px;
+    letter-spacing: 0.5px;
+}
+
+.impact-value {
+    font-size: 36px;
+    font-weight: 800;
+    margin-top: 10px;
+}
+
+
+/* BUTTON */
+
+.stButton > button {
+    width: 100%;
+    border-radius: 12px;
+    border: 0;
+    background: #4B1F73;
+    color: white;
+    font-weight: 700;
+    padding: 11px 16px;
+}
+
+.stButton > button:hover {
+    background: #381656;
+    color: white;
+}
+
+
+/* SLIDER */
+
+div[data-baseweb="slider"] {
+    margin-bottom: 18px;
+}
+
+
+/* TABLE */
+
+.stDataFrame {
+    border-radius: 15px;
+}
+
+
+/* FOOTER */
+
+.footer {
+    text-align: center;
+    color: #99929f;
+    font-size: 11px;
+    padding: 30px 0;
+}
+
+</style>
+""")
 
 
 # =========================================================
 # HERO
 # =========================================================
 
-st.markdown(
-    """
-    <div class="hero">
+render_html("""
+<div class="hero">
 
-        <div class="hero-eyebrow">
-            FINANCIAL DECISION INTELLIGENCE
-        </div>
-
-        <div class="hero-title">
-            Financial Decision Engine
-        </div>
-
-        <div class="hero-subtitle">
-            من البيانات → الأثر المالي → القرار
-        </div>
-
-        <div class="hero-author">
-            FINANCIAL PLANNING & ANALYSIS
-        </div>
-
+    <div class="hero-eyebrow">
+        FINANCIAL DECISION INTELLIGENCE
     </div>
-    """,
-    unsafe_allow_html=True
-)
+
+    <div class="hero-title">
+        Financial Decision Engine
+    </div>
+
+    <div class="hero-subtitle">
+        من البيانات → الأثر المالي → القرار
+    </div>
+
+    <div class="hero-author">
+        FINANCIAL PLANNING & ANALYSIS
+    </div>
+
+</div>
+""")
 
 
 # =========================================================
 # EXECUTIVE OVERVIEW
 # =========================================================
 
-st.markdown(
-    '<div class="section-title">Executive Financial Overview</div>',
-    unsafe_allow_html=True
-)
+render_html("""
+<div class="section-title">
+    Executive Financial Overview
+</div>
 
-st.markdown(
-    '<div class="section-subtitle">'
-    'نظرة تنفيذية سريعة على الوضع المالي الحالي قبل اتخاذ القرار.'
-    '</div>',
-    unsafe_allow_html=True
-)
+<div class="section-subtitle">
+    نظرة تنفيذية سريعة على الوضع المالي الحالي قبل اتخاذ القرار.
+</div>
+""")
 
 
 # =========================================================
@@ -388,26 +399,23 @@ for col, item in zip(kpi_cols, kpis):
 
     with col:
 
-        st.markdown(
-            f"""
-            <div class="card">
+        render_html(f"""
+        <div class="card">
 
-                <div class="card-label">
-                    {label}
-                </div>
-
-                <div class="card-value">
-                    {value}
-                </div>
-
-                <div class="card-sub">
-                    {subtitle}
-                </div>
-
+            <div class="card-label">
+                {label}
             </div>
-            """,
-            unsafe_allow_html=True
-        )
+
+            <div class="card-value">
+                {value}
+            </div>
+
+            <div class="card-sub">
+                {subtitle}
+            </div>
+
+        </div>
+        """)
 
 
 # =========================================================
@@ -428,22 +436,19 @@ left, right = st.columns(
 
 with left:
 
-    st.markdown(
-        """
-        <div class="panel">
+    render_html("""
+    <div class="panel">
 
-            <div class="panel-title">
-                Decision Drivers
-            </div>
-
-            <div class="panel-subtitle">
-                غيّري الافتراضات وشاهدي الأثر المالي فورًا.
-            </div>
-
+        <div class="panel-title">
+            Decision Drivers
         </div>
-        """,
-        unsafe_allow_html=True
-    )
+
+        <div class="panel-subtitle">
+            غيّري الافتراضات وشاهدي الأثر المالي فورًا.
+        </div>
+
+    </div>
+    """)
 
     new_employees = st.slider(
         "الموظفون الجدد",
@@ -483,31 +488,29 @@ with left:
     st.markdown("<br>", unsafe_allow_html=True)
 
     if st.button("إعادة ضبط السيناريو"):
-
         st.rerun()
 
-    st.markdown(
-        """
-        <div style="
-            background:#f4eff7;
-            border-radius:14px;
-            padding:14px;
-            font-size:11px;
-            color:#645b69;
-            line-height:1.8;
-            margin-top:15px;
-            direction:rtl;
-        ">
+    render_html("""
+    <div style="
+        background:#f4eff7;
+        border-radius:14px;
+        padding:14px;
+        font-size:11px;
+        color:#645b69;
+        line-height:1.8;
+        margin-top:15px;
+        direction:rtl;
+    ">
 
         هذه نسخة MVP من محرك القرار المالي.
+
         <br><br>
+
         لاحقًا يمكن ربط المحرك ببيانات المؤسسة الفعلية
         وإضافة السيناريوهات والتقارير ومصادر البيانات.
 
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
+    </div>
+    """)
 
 
 # =========================================================
@@ -553,25 +556,31 @@ budget_ratio = (
 if net_impact > 1_000_000:
 
     decision = "قرار إيجابي مبدئي"
+
     explanation = (
         "الأثر المالي المتوقع موجب وفق الافتراضات الحالية."
     )
+
     decision_class = "good"
 
 elif net_impact < -1_000_000:
 
     decision = "يحتاج مراجعة"
+
     explanation = (
         "الزيادة في التكلفة تتجاوز الأثر المالي المتوقع."
     )
+
     decision_class = "bad"
 
 else:
 
     decision = "محايد"
+
     explanation = (
         "السيناريو قريب من الوضع الحالي ويحتاج تقييمًا إضافيًا."
     )
+
     decision_class = "neutral"
 
 
@@ -581,22 +590,19 @@ else:
 
 with right:
 
-    st.markdown(
-        """
-        <div class="panel">
+    render_html("""
+    <div class="panel">
 
-            <div class="panel-title">
-                Financial Impact of Decision
-            </div>
-
-            <div class="panel-subtitle">
-                الأثر المالي المتوقع بناءً على السيناريو المختار.
-            </div>
-
+        <div class="panel-title">
+            Financial Impact of Decision
         </div>
-        """,
-        unsafe_allow_html=True
-    )
+
+        <div class="panel-subtitle">
+            الأثر المالي المتوقع بناءً على السيناريو المختار.
+        </div>
+
+    </div>
+    """)
 
     result_cols = st.columns(3)
 
@@ -639,64 +645,57 @@ with right:
 
         with result_cols[i % 3]:
 
-            st.markdown(
-                f"""
-                <div class="result">
+            render_html(f"""
+            <div class="result">
 
-                    <div class="result-label">
-                        {label}
-                    </div>
-
-                    <div class="result-value {css_class}">
-                        {value}
-                    </div>
-
+                <div class="result-label">
+                    {label}
                 </div>
-                """,
-                unsafe_allow_html=True
-            )
 
+                <div class="result-value {css_class}">
+                    {value}
+                </div>
 
-    # Decision
-
-    st.markdown(
-        f"""
-        <div class="decision">
-
-            <div class="decision-title {decision_class}">
-                {decision}
             </div>
+            """)
 
-            <div class="decision-text">
-                {explanation}
-            </div>
 
+    # =====================================================
+    # DECISION
+    # =====================================================
+
+    render_html(f"""
+    <div class="decision">
+
+        <div class="decision-title {decision_class}">
+            {decision}
         </div>
-        """,
-        unsafe_allow_html=True
-    )
+
+        <div class="decision-text">
+            {explanation}
+        </div>
+
+    </div>
+    """)
 
 
 # =========================================================
 # NET IMPACT HIGHLIGHT
 # =========================================================
 
-st.markdown(
-    f"""
-    <div class="impact-box">
+render_html(f"""
+<div class="impact-box">
 
-        <div class="impact-label">
-            NET FINANCIAL IMPACT
-        </div>
-
-        <div class="impact-value {decision_class}">
-            {net_impact:+,.0f} SAR
-        </div>
-
+    <div class="impact-label">
+        NET FINANCIAL IMPACT
     </div>
-    """,
-    unsafe_allow_html=True
-)
+
+    <div class="impact-value {decision_class}">
+        {net_impact:+,.0f} SAR
+    </div>
+
+</div>
+""")
 
 
 # =========================================================
@@ -709,22 +708,19 @@ budget_col1, budget_col2 = st.columns(
 
 with budget_col1:
 
-    st.markdown(
-        """
-        <div class="panel">
+    render_html("""
+    <div class="panel">
 
-            <div class="panel-title">
-                Budget Utilization
-            </div>
-
-            <div class="panel-subtitle">
-                نسبة تكلفة القوى العاملة من الميزانية السنوية.
-            </div>
-
+        <div class="panel-title">
+            Budget Utilization
         </div>
-        """,
-        unsafe_allow_html=True
-    )
+
+        <div class="panel-subtitle">
+            نسبة تكلفة القوى العاملة من الميزانية السنوية.
+        </div>
+
+    </div>
+    """)
 
     st.progress(
         min(
@@ -746,50 +742,45 @@ with budget_col1:
 
 with budget_col2:
 
-    st.markdown(
-        f"""
-        <div class="panel">
+    render_html(f"""
+    <div class="panel">
 
-            <div class="panel-title">
-                Cost per Employee
-            </div>
-
-            <div class="panel-subtitle">
-                متوسط التكلفة الشهرية للموظف.
-            </div>
-
-            <div class="result-value">
-                {AVG_MONTHLY_COST:,.0f} SAR
-            </div>
-
+        <div class="panel-title">
+            Cost per Employee
         </div>
-        """,
-        unsafe_allow_html=True
-    )
+
+        <div class="panel-subtitle">
+            متوسط التكلفة الشهرية للموظف.
+        </div>
+
+        <div class="result-value">
+            {AVG_MONTHLY_COST:,.0f} SAR
+        </div>
+
+    </div>
+    """)
 
 
 # =========================================================
-# COMPARISON
+# CURRENT VS SCENARIO
 # =========================================================
 
 st.markdown("<br>", unsafe_allow_html=True)
 
-st.markdown(
-    """
-    <div class="panel">
+render_html("""
+<div class="panel">
 
-        <div class="panel-title">
-            Current vs Scenario
-        </div>
-
-        <div class="panel-subtitle">
-            مقارنة الوضع الحالي بالسيناريو المقترح.
-        </div>
-
+    <div class="panel-title">
+        Current vs Scenario
     </div>
-    """,
-    unsafe_allow_html=True
-)
+
+    <div class="panel-subtitle">
+        مقارنة الوضع الحالي بالسيناريو المقترح.
+    </div>
+
+</div>
+""")
+
 
 comparison = pd.DataFrame(
     {
@@ -844,22 +835,19 @@ bridge_col, scenario_col = st.columns(
 
 with bridge_col:
 
-    st.markdown(
-        """
-        <div class="panel">
+    render_html("""
+    <div class="panel">
 
-            <div class="panel-title">
-                Financial Impact Bridge
-            </div>
-
-            <div class="panel-subtitle">
-                مكونات التغير في الأثر المالي.
-            </div>
-
+        <div class="panel-title">
+            Financial Impact Bridge
         </div>
-        """,
-        unsafe_allow_html=True
-    )
+
+        <div class="panel-subtitle">
+            مكونات التغير في الأثر المالي.
+        </div>
+
+    </div>
+    """)
 
     bridge = pd.DataFrame(
         {
@@ -888,22 +876,19 @@ with bridge_col:
 
 with scenario_col:
 
-    st.markdown(
-        """
-        <div class="panel">
+    render_html("""
+    <div class="panel">
 
-            <div class="panel-title">
-                Scenario Assumptions
-            </div>
-
-            <div class="panel-subtitle">
-                الافتراضات التي بُني عليها القرار.
-            </div>
-
+        <div class="panel-title">
+            Scenario Assumptions
         </div>
-        """,
-        unsafe_allow_html=True
-    )
+
+        <div class="panel-subtitle">
+            الافتراضات التي بُني عليها القرار.
+        </div>
+
+    </div>
+    """)
 
     snapshot = pd.DataFrame(
         {
@@ -953,46 +938,44 @@ else:
     )
 
 
-st.markdown(
-    f"""
-    <div class="panel">
+render_html(f"""
+<div class="panel">
 
-        <div class="panel-title">
-            Management Insight
-        </div>
-
-        <div class="panel-subtitle">
-            قراءة تحليلية للقرار.
-        </div>
-
-        <div style="
-            background:#f4eff7;
-            padding:18px;
-            border-radius:15px;
-            line-height:1.9;
-            color:#51495a;
-            direction:rtl;
-        ">
-            {insight}
-        </div>
-
+    <div class="panel-title">
+        Management Insight
     </div>
-    """,
-    unsafe_allow_html=True
-)
+
+    <div class="panel-subtitle">
+        قراءة تحليلية للقرار.
+    </div>
+
+    <div style="
+        background:#f4eff7;
+        padding:18px;
+        border-radius:15px;
+        line-height:1.9;
+        color:#51495a;
+        direction:rtl;
+    ">
+        {insight}
+    </div>
+
+</div>
+""")
 
 
 # =========================================================
 # FOOTER
 # =========================================================
 
-st.markdown(
-    """
-    <div class="footer">
-        Financial Decision Engine — MVP
-        <br>
-        Financial Planning & Analysis
-    </div>
-    """,
-    unsafe_allow_html=True
-)
+render_html("""
+<div class="footer">
+
+    Financial Decision Engine — MVP
+
+    <br>
+
+    Financial Planning & Analysis
+
+</div>
+""")
